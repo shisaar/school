@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Mash - Кто круче?</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>SCHOOL MASH</h1>
+        <p>Кого выберешь ты? Кликай по фото!</p>
+    </header>
+
+    <main class="comparison-container">
+        <div class="card" id="left-card" onclick="vote('left')">
+            <img id="left-img" src="" alt="Photo 1">
+            <h2 id="left-name">Загрузка...</h2>
+        </div>
+
+        <div class="vs">VS</div>
+
+        <div class="card" id="right-card" onclick="vote('right')">
+            <img id="right-img" src="" alt="Photo 2">
+            <h2 id="right-name">Загрузка...</h2>
+        </div>
+    </main>
+
+    <section class="leaderboard">
+        <h3>Топ рейтинга</h3>
+        <ul id="leader-list"></ul>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
