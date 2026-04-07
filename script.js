@@ -1,6 +1,6 @@
 // Используем переменную db вместо supabase, чтобы не было конфликтов
 const SUPABASE_URL = 'https://eycbfksbhhzuzmjbugbx.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_fM7G427oU9tXRVHUNGHZyA_5jlGcUJg';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5Y2Jma3NiaGh6dXptamJ1Z2J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTc5MzksImV4cCI6MjA5MTEzMzkzOX0.0UqGyZ7iOOZ3IaAoVw5OYs0wGP48hX5mB5FbEW-Ncq0';
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
