@@ -6,9 +6,6 @@ const SUPABASE_KEY = 'sb_publishable_fM7G427oU9tXRVHUNGHZyA_5jlGcUJg'; // Про
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Важно: в остальном коде теперь используй переменную supabaseClient 
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let students = [];
 let leftIdx, rightIdx;
