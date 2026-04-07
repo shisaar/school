@@ -1,36 +1,53 @@
-// Временная база данных (заменится на реальную облачную позже)
-let students = [
-    { id: 1, name: "Алексей", photo: "https://via.placeholder.com/300x400?text=Alex", rating: 1200 },
-    { id: 2, name: "Мария", photo: "https://via.placeholder.com/300x400?text=Maria", rating: 1200 },
-    { id: 3, name: "Иван", photo: "https://via.placeholder.com/300x400?text=Ivan", rating: 1200 },
-    { id: 4, name: "Дарья", photo: "https://via.placeholder.com/300x400?text=Daria", rating: 1200 }
-];
+// Твои настройки подключения (УЖЕ ВПИСАЛ ТВОЙ URL)
+const SUPABASE_URL = 'https://eycbfksbhhzuzmjbugbx.supabase.co';
+// СЮДА ВСТАВЬ ТОТ ДЛИННЫЙ КЛЮЧ (Anon Key), КОТОРЫЙ КОПИРОВАЛ В SUPABASE
+const SUPABASE_KEY = 'sb_publishable_fM7G427oU9tXRVHUNGHZyA_5jlGcUJg'; 
 
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let students = [];
 let leftIdx, rightIdx;
 
+async function loadStudents() {
+    const { data, error } = await supabase.from('students').select('*');
+    if (error) {
+        console.error("Ошибка загрузки:", error);
+    } else {
+        students = data;
+        updatePair();
+        updateLeaderboard();
+    }
+}
+
 function updatePair() {
+    if (students.length < 2) return;
     leftIdx = Math.floor(Math.random() * students.length);
     do {
         rightIdx = Math.floor(Math.random() * students.length);
     } while (leftIdx === rightIdx);
 
-    document.getElementById('left-img').src = students[leftIdx].photo;
+    document.getElementById('left-img').src = students[leftIdx].photo_url;
     document.getElementById('left-name').innerText = students[leftIdx].name;
-    document.getElementById('right-img').src = students[rightIdx].photo;
+    document.getElementById('right-img').src = students[rightIdx].photo_url;
     document.getElementById('right-name').innerText = students[rightIdx].name;
 }
 
-function vote(side) {
+async function vote(side) {
     let winner = side === 'left' ? students[leftIdx] : students[rightIdx];
     let loser = side === 'left' ? students[rightIdx] : students[leftIdx];
 
-    // Формула Эло
     const K = 32;
     let expectedW = 1 / (1 + 10 ** ((loser.rating - winner.rating) / 400));
     let expectedL = 1 / (1 + 10 ** ((winner.rating - loser.rating) / 400));
 
-    winner.rating += Math.round(K * (1 - expectedW));
-    loser.rating += Math.round(K * (0 - expectedL));
+    let newWinnerRating = Math.round(winner.rating + K * (1 - expectedW));
+    let newLoserRating = Math.round(loser.rating + K * (0 - expectedL));
+
+    await supabase.from('students').update({ rating: newWinnerRating }).eq('id', winner.id);
+    await supabase.from('students').update({ rating: newLoserRating }).eq('id', loser.id);
+
+    winner.rating = newWinnerRating;
+    loser.rating = newLoserRating;
 
     updateLeaderboard();
     updatePair();
@@ -40,11 +57,9 @@ function updateLeaderboard() {
     const list = document.getElementById('leader-list');
     list.innerHTML = "";
     let sorted = [...students].sort((a, b) => b.rating - a.rating);
-    sorted.forEach(s => {
-        list.innerHTML += `<li>${s.name}: ${s.rating}</li>`;
+    sorted.slice(0, 10).forEach((s, index) => {
+        list.innerHTML += `<li>#${index+1} ${s.name}: ${s.rating}</li>`;
     });
 }
 
-// Старт
-updatePair();
-updateLeaderboard();
+loadStudents();
