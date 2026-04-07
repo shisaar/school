@@ -75,3 +75,19 @@ li { padding: 5px; border-bottom: 1px solid #444; }
     font-size: 13px;
     box-shadow: 0 4px 15px rgba(255, 75, 43, 0.3);
 }
+.card {
+    transition: all 0.2s ease;
+}
+
+/* Класс, который JS будет вешать при клике */
+.winner-anim {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px #2ecc71 !important;
+    border-color: #2ecc71 !important;
+}
+
+.loser-anim {
+    transform: scale(0.9);
+    filter: grayscale(100%);
+    opacity: 0.5;
+}
