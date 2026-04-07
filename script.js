@@ -9,7 +9,7 @@ let leftIdx, rightIdx;
 async function loadStudents() {
     const { data, error } = await db.from('students').select('*');
     if (error) {
-        console.error("Ошибка загрузки данных:", error);
+        console.error("Ошибка загрузки:", error);
     } else {
         students = data;
         if (students && students.length > 1) {
@@ -20,6 +20,7 @@ async function loadStudents() {
 }
 
 function updatePair() {
+    if (!students.length) return;
     leftIdx = Math.floor(Math.random() * students.length);
     do {
         rightIdx = Math.floor(Math.random() * students.length);
@@ -32,6 +33,8 @@ function updatePair() {
 }
 
 async function vote(side) {
+    if (!students[leftIdx] || !students[rightIdx]) return; // Защита от ошибок
+
     let winner = side === 'left' ? students[leftIdx] : students[rightIdx];
     let loser = side === 'left' ? students[rightIdx] : students[leftIdx];
 
@@ -39,19 +42,14 @@ async function vote(side) {
     let expectedW = 1 / (1 + 10 ** ((loser.rating - winner.rating) / 400));
     let expectedL = 1 / (1 + 10 ** ((winner.rating - loser.rating) / 400));
 
-    let newWinnerRating = Math.round(winner.rating + K * (1 - expectedW));
-    let newLoserRating = Math.round(loser.rating + K * (0 - expectedL));
-
-    // Обновляем локально сразу для скорости
-    winner.rating = newWinnerRating;
-    loser.rating = newLoserRating;
+    winner.rating = Math.round(winner.rating + K * (1 - expectedW));
+    loser.rating = Math.round(loser.rating + K * (0 - expectedL));
 
     updateLeaderboard();
     updatePair();
 
-    // Отправляем в базу в фоне
-    await db.from('students').update({ rating: newWinnerRating }).eq('id', winner.id);
-    await db.from('students').update({ rating: newLoserRating }).eq('id', loser.id);
+    await db.from('students').update({ rating: winner.rating }).eq('id', winner.id);
+    await db.from('students').update({ rating: loser.rating }).eq('id', loser.id);
 }
 
 function updateLeaderboard() {
@@ -63,27 +61,20 @@ function updateLeaderboard() {
 
     sorted.forEach((student, index) => {
         let el = document.getElementById(`row-${student.id}`);
-        
-        // Создаем строку, если её нет
         if (!el) {
             el = document.createElement('div');
             el.id = `row-${student.id}`;
             el.className = 'leader-item';
             el.innerHTML = `
                 <img src="${student.photo_url}" class="mini-avatar">
-                <div class="leader-name">${student.name}</div>
+                <div class="leader-name" style="width:100px; overflow:hidden;">${student.name}</div>
                 <div class="bar" id="bar-${student.id}"></div>
             `;
             container.appendChild(el);
         }
-
-        // Перемещаем строку
-        el.style.transform = `translateY(${index * 65}px)`;
-
-        // Растягиваем полоску
+        el.style.transform = `translateY(${index * 60}px)`;
         const bar = document.getElementById(`bar-${student.id}`);
-        let widthPercent = (student.rating / maxRating) * 60; // 60% от ширины экрана
-        bar.style.width = `${widthPercent}%`;
+        bar.style.width = `${(student.rating / maxRating) * 60}%`;
         bar.innerText = Math.round(student.rating);
     });
 }
