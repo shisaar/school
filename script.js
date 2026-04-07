@@ -1,3 +1,4 @@
+alert("СКРИПТ ЗАГРУЖЕН!")
 // Твои настройки подключения (УЖЕ ВПИСАЛ ТВОЙ URL)
 const SUPABASE_URL = 'https://eycbfksbhhzuzmjbugbx.supabase.co';
 // СЮДА ВСТАВЬ ТОТ ДЛИННЫЙ КЛЮЧ (Anon Key), КОТОРЫЙ КОПИРОВАЛ В SUPABASE
