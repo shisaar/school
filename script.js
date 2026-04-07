@@ -59,39 +59,38 @@ async function vote(side) {
 
 function updateLeaderboard() {
     const container = document.getElementById('leader-container');
-    
-    // Сортируем всех, но берем топ 8
+    if (!container) return;
+
+    // Сортируем топ-8
     let sorted = [...students].sort((a, b) => b.rating - a.rating).slice(0, 8);
-    
-    // Находим максимальный рейтинг для масштаба полосок
     const maxRating = sorted.length > 0 ? sorted[0].rating : 1200;
 
     sorted.forEach((student, index) => {
-        let el = document.getElementById(`student-${student.id}`);
+        let el = document.getElementById(`student-row-${student.id}`);
         
-        // Если элемента еще нет — создаем
+        // Если этого ученика еще нет в списке — создаем его "строку"
         if (!el) {
             el = document.createElement('div');
-            el.id = `student-${student.id}`;
-            el.className = 'leader-item';
+            el.id = `student-row-${student.id}`;
+            el.className = 'leader-item'; 
             el.innerHTML = `
+                <img src="${student.photo_url}" class="mini-avatar">
                 <div class="leader-name">${student.name}</div>
                 <div class="bar" id="bar-${student.id}"></div>
             `;
             container.appendChild(el);
         }
 
-        // Высчитываем ширину полоски (в процентах)
-        let widthPercent = (student.rating / maxRating) * 70; // 70% максимум
-        
-        // Двигаем элемент на его место (index * 60px)
+        // Анимация перемещения (вверх/вниз)
         el.style.transform = `translateY(${index * 60}px)`;
-        
-        // Обновляем полоску
+
+        // Анимация ширины полоски
         const bar = document.getElementById(`bar-${student.id}`);
+        let widthPercent = (student.rating / maxRating) * 65; // Максимум 65% ширины
         bar.style.width = `${widthPercent}%`;
         bar.innerText = Math.round(student.rating);
     });
+}
 }
 
 // Запуск
