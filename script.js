@@ -3,6 +3,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+let totalVotes = 0;
 let students = [];
 let leftIdx, rightIdx;
 
@@ -78,5 +79,54 @@ function updateLeaderboard() {
         bar.innerText = Math.round(student.rating);
     });
 }
+d
+
+// Обновленная функция голосования с анимацией
+async function vote(side) {
+    const leftCard = document.getElementById('left-card');
+    const rightCard = document.getElementById('right-card');
+
+    let winner = side === 'left' ? students[leftIdx] : students[rightIdx];
+    let loser = side === 'left' ? students[rightIdx] : students[leftIdx];
+    let winnerEl = side === 'left' ? leftCard : rightCard;
+    let loserEl = side === 'left' ? rightCard : leftCard;
+
+    // 1. Включаем анимацию
+    winnerEl.classList.add('winner-anim');
+    loserEl.classList.add('loser-anim');
+
+    // Расчет рейтинга (оставляем твой код)
+    const K = 32;
+    let expectedW = 1 / (1 + 10 ** ((loser.rating - winner.rating) / 400));
+    let expectedL = 1 / (1 + 10 ** ((winner.rating - loser.rating) / 400));
+    winner.rating = Math.round(winner.rating + K * (1 - expectedW));
+    loser.rating = Math.round(loser.rating + K * (0 - expectedL));
+
+    // Обновляем статистику
+    totalVotes++;
+    document.getElementById('total-votes').innerText = totalVotes;
+
+    // Ждем полсекунды, чтобы увидеть анимацию
+    setTimeout(async () => {
+        // 2. Убираем анимацию и меняем пару
+        winnerEl.classList.remove('winner-anim');
+        loserEl.classList.remove('loser-anim');
+        
+        updateLeaderboard();
+        updatePair();
+
+        // 3. Отправляем в базу
+        await db.from('students').update({ rating: winner.rating }).eq('id', winner.id);
+        await db.from('students').update({ rating: loser.rating }).eq('id', loser.id);
+    }, 500);
+}
+
+// Простая имитация онлайна (для красоты)
+function updateOnline() {
+    // Генерируем число от 1 до 5 вокруг реального (пока нет сервера для точного онлайна)
+    const mockOnline = Math.floor(Math.random() * 3) + 1; 
+    document.getElementById('online-count').innerText = mockOnline;
+}
+setInterval(updateOnline, 10000); // Обновлять каждые 10 сек
 
 loadStudents();
