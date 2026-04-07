@@ -79,7 +79,7 @@ function updateLeaderboard() {
         bar.innerText = Math.round(student.rating);
     });
 }
-d
+
 
 // Обновленная функция голосования с анимацией
 async function vote(side) {
