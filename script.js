@@ -1,11 +1,10 @@
-alert("СКРИПТ ЗАГРУЖЕН!")
-// Твои настройки подключения (УЖЕ ВПИСАЛ ТВОЙ URL)
-// Используй window.supabase, чтобы браузер точно увидел библиотеку
+alert("Скрипт загружен!");
+
 const SUPABASE_URL = 'https://eycbfksbhhzuzmjbugbx.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_fM7G427oU9tXRVHUNGHZyA_5jlGcUJg'; // Проверь, чтобы тут был длинный ключ в кавычках
+const SUPABASE_KEY = 'sb_publishable_fnYG427oU9tXRVHUNGHZyA_5j1GcUJg'; // Твой ключ
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+// Создаем одного клиента с именем supabase
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let students = [];
 let leftIdx, rightIdx;
@@ -16,8 +15,12 @@ async function loadStudents() {
         console.error("Ошибка загрузки:", error);
     } else {
         students = data;
-        updatePair();
-        updateLeaderboard();
+        if (students.length > 0) {
+            updatePair();
+            updateLeaderboard();
+        } else {
+            console.log("В таблице students пока нет данных!");
+        }
     }
 }
 
