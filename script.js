@@ -1,6 +1,5 @@
-// Используем переменную db вместо supabase, чтобы не было конфликтов
 const SUPABASE_URL = 'https://eycbfksbhhzuzmjbugbx.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5Y2Jma3NiaGh6dXptamJ1Z2J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTc5MzksImV4cCI6MjA5MTEzMzkzOX0.0UqGyZ7iOOZ3IaAoVw5OYs0wGP48hX5mB5FbEW-Ncq0';
+const SUPABASE_KEY = 'sb_publishable_fnYG427oU9tXRVHUNGHZyA_5j1GcUJg';
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -16,8 +15,6 @@ async function loadStudents() {
         if (students && students.length > 1) {
             updatePair();
             updateLeaderboard();
-        } else {
-            console.log("Добавь минимум 2 человека в таблицу students в Supabase!");
         }
     }
 }
@@ -45,34 +42,33 @@ async function vote(side) {
     let newWinnerRating = Math.round(winner.rating + K * (1 - expectedW));
     let newLoserRating = Math.round(loser.rating + K * (0 - expectedL));
 
-    // Обновляем в базе
-    await db.from('students').update({ rating: newWinnerRating }).eq('id', winner.id);
-    await db.from('students').update({ rating: newLoserRating }).eq('id', loser.id);
-
-    // Обновляем локально
+    // Обновляем локально сразу для скорости
     winner.rating = newWinnerRating;
     loser.rating = newLoserRating;
 
     updateLeaderboard();
     updatePair();
+
+    // Отправляем в базу в фоне
+    await db.from('students').update({ rating: newWinnerRating }).eq('id', winner.id);
+    await db.from('students').update({ rating: newLoserRating }).eq('id', loser.id);
 }
 
 function updateLeaderboard() {
     const container = document.getElementById('leader-container');
     if (!container) return;
 
-    // Сортируем топ-8
     let sorted = [...students].sort((a, b) => b.rating - a.rating).slice(0, 8);
     const maxRating = sorted.length > 0 ? sorted[0].rating : 1200;
 
     sorted.forEach((student, index) => {
-        let el = document.getElementById(`student-row-${student.id}`);
+        let el = document.getElementById(`row-${student.id}`);
         
-        // Если этого ученика еще нет в списке — создаем его "строку"
+        // Создаем строку, если её нет
         if (!el) {
             el = document.createElement('div');
-            el.id = `student-row-${student.id}`;
-            el.className = 'leader-item'; 
+            el.id = `row-${student.id}`;
+            el.className = 'leader-item';
             el.innerHTML = `
                 <img src="${student.photo_url}" class="mini-avatar">
                 <div class="leader-name">${student.name}</div>
@@ -81,17 +77,15 @@ function updateLeaderboard() {
             container.appendChild(el);
         }
 
-        // Анимация перемещения (вверх/вниз)
-        el.style.transform = `translateY(${index * 60}px)`;
+        // Перемещаем строку
+        el.style.transform = `translateY(${index * 65}px)`;
 
-        // Анимация ширины полоски
+        // Растягиваем полоску
         const bar = document.getElementById(`bar-${student.id}`);
-        let widthPercent = (student.rating / maxRating) * 65; // Максимум 65% ширины
+        let widthPercent = (student.rating / maxRating) * 60; // 60% от ширины экрана
         bar.style.width = `${widthPercent}%`;
         bar.innerText = Math.round(student.rating);
     });
 }
-}
 
-// Запуск
 loadStudents();
