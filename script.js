@@ -1,41 +1,27 @@
-alert("Скрипт загружен!");
-
 const SUPABASE_URL = 'https://eycbfksbhhzuzmjbugbx.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_fnYG427oU9tXRVHUNGHZyA_5j1GcUJg'; // Твой ключ
+const SUPABASE_KEY = 'sb_publishable_fnYG427oU9tXRVHUNGHZyA_5j1GcUJg';
 
-// Создаем одного клиента с именем supabase
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// МЕНЯЕМ ИМЯ НА db, чтобы не было ошибки
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let students = [];
 let leftIdx, rightIdx;
 
 async function loadStudents() {
-    const { data, error } = await supabase.from('students').select('*');
+    // Везде в коде меняем supabase на db
+    const { data, error } = await db.from('students').select('*');
     if (error) {
         console.error("Ошибка загрузки:", error);
     } else {
         students = data;
-        if (students.length > 0) {
+        if (students && students.length > 0) {
             updatePair();
             updateLeaderboard();
-        } else {
-            console.log("В таблице students пока нет данных!");
         }
     }
 }
 
-function updatePair() {
-    if (students.length < 2) return;
-    leftIdx = Math.floor(Math.random() * students.length);
-    do {
-        rightIdx = Math.floor(Math.random() * students.length);
-    } while (leftIdx === rightIdx);
-
-    document.getElementById('left-img').src = students[leftIdx].photo_url;
-    document.getElementById('left-name').innerText = students[leftIdx].name;
-    document.getElementById('right-img').src = students[rightIdx].photo_url;
-    document.getElementById('right-name').innerText = students[rightIdx].name;
-}
+// ... остальной код функций updatePair и updateLeaderboard остается таким же ...
 
 async function vote(side) {
     let winner = side === 'left' ? students[leftIdx] : students[rightIdx];
@@ -48,23 +34,15 @@ async function vote(side) {
     let newWinnerRating = Math.round(winner.rating + K * (1 - expectedW));
     let newLoserRating = Math.round(loser.rating + K * (0 - expectedL));
 
-    await supabase.from('students').update({ rating: newWinnerRating }).eq('id', winner.id);
-    await supabase.from('students').update({ rating: newLoserRating }).eq('id', loser.id);
+    // Здесь тоже меняем на db
+    await db.from('students').update({ rating: newWinnerRating }).eq('id', winner.id);
+    await db.from('students').update({ rating: newLoserRating }).eq('id', loser.id);
 
     winner.rating = newWinnerRating;
     loser.rating = newLoserRating;
 
     updateLeaderboard();
     updatePair();
-}
-
-function updateLeaderboard() {
-    const list = document.getElementById('leader-list');
-    list.innerHTML = "";
-    let sorted = [...students].sort((a, b) => b.rating - a.rating);
-    sorted.slice(0, 10).forEach((s, index) => {
-        list.innerHTML += `<li>#${index+1} ${s.name}: ${s.rating}</li>`;
-    });
 }
 
 loadStudents();
