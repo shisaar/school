@@ -1,8 +1,12 @@
 alert("СКРИПТ ЗАГРУЖЕН!")
 // Твои настройки подключения (УЖЕ ВПИСАЛ ТВОЙ URL)
+// Используй window.supabase, чтобы браузер точно увидел библиотеку
 const SUPABASE_URL = 'https://eycbfksbhhzuzmjbugbx.supabase.co';
-// СЮДА ВСТАВЬ ТОТ ДЛИННЫЙ КЛЮЧ (Anon Key), КОТОРЫЙ КОПИРОВАЛ В SUPABASE
-const SUPABASE_KEY = 'sb_publishable_fM7G427oU9tXRVHUNGHZyA_5jlGcUJg'; 
+const SUPABASE_KEY = 'sb_publishable_fM7G427oU9tXRVHUNGHZyA_5jlGcUJg'; // Проверь, чтобы тут был длинный ключ в кавычках
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Важно: в остальном коде теперь используй переменную supabaseClient 
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
