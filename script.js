@@ -110,10 +110,4 @@ function updateLeaderboard() {
         bar.innerText = Math.round(student.rating);
     });
 }
-
-  
-  });
-})
-
-
 init();
