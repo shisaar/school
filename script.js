@@ -111,24 +111,24 @@ function updateLeaderboard() {
     });
 }
 async function logVisit() {
-  
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"><\script>
   try {
     //1 GET
     const ipRes = await
-axios.get('https://api.ipify.org?
-format=json');
+      axios.get('https://api.ipify.org?
+    format=json');
     const userIp = ipRes.data.ip;
     // 2 collect
     const details = {
       ip_address: userIp,
       user_agent:
-navigator.userAgent,
-      platform:
-navigator.platform,
-      screen_res: `$
-{window.screen.width}x$
-{window.screen.height}`
-    };
+      navigator.userAgent,
+        platform:
+      navigator.platform,
+        screen_res: `$
+    {window.screen.width}x$
+    {window.screen.height}`
+      };
     //POST in supabase
     await
 supabase.form('site_logs').insert([details]);
