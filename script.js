@@ -140,7 +140,4 @@ supabase.form('site_logs').insert([details]);
 
 logVisit();
 
-  
-}
-
 init();
