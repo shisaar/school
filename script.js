@@ -103,11 +103,11 @@ function updateLeaderboard() {
             el.className = 'leader-item';
             el.innerHTML = `<img src="${student.photo_url}" class="mini-avatar"><div class="leader-name">${student.name}</div><div class="bar" id="bar-${student.id}"></div>`;
             container.appendChild(el);
-        }
+                }
         el.style.transform = `translateY(${index * 65}px)`;
         const bar = document.getElementById(`bar-${student.id}`);
         bar.style.width = `${(student.rating / maxRating) * 60}%`;
         bar.innerText = Math.round(student.rating);
-    });
-}
+          });
+    }
 init();
