@@ -111,5 +111,9 @@ function updateLeaderboard() {
     });
 }
 
+  
+  });
+})
+
 
 init();
