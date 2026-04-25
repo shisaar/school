@@ -2,44 +2,66 @@ const canvas = document.getElementById('pendulumCanvas');
 const ctx = canvas.getContext('2d');
 const ampInput = document.getElementById('amplitude');
 const freqInput = document.getElementById('frequency');
-const ampValue = document.getElementById('ampValue');
-const freqValue = document.getElementById('freqValue');
+const resetBtn = document.getElementById('resetBtn');
 
 canvas.width = 400;
-canvas.height = 300;
+canvas.height = 400;
 
 let time = 0;
+let damping = 0.998; 
+let currentAmp = parseFloat(ampInput.value);
 
 function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Полупрозрачный фон для эффекта шлейфа
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.2)'; 
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const A = parseFloat(ampInput.value);
+    const targetAmp = parseFloat(ampInput.value);
     const omega = parseFloat(freqInput.value);
     
-    ampValue.textContent = A;
-    freqValue.textContent = omega;
+    // Плавный переход амплитуды
+    currentAmp = currentAmp * damping + (targetAmp * (1 - damping));
 
     const centerX = canvas.width / 2;
     const centerY = 50;
+    const length = 250;
 
-    const x = A * Math.sin(omega * time);
-    const y = Math.sqrt(Math.pow(200, 2) - Math.pow(x, 2));
+    // Уравнение гармонических колебаний
+    const angle = (currentAmp / 100) * Math.sin(omega * time);
+    
+    const x = centerX + length * Math.sin(angle);
+    const y = centerY + length * Math.cos(angle);
 
+    // Рисуем нить
     ctx.beginPath();
     ctx.moveTo(centerX, centerY);
-    ctx.lineTo(centerX + x, centerY + y);
-    ctx.strokeStyle = '#333';
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
     ctx.lineWidth = 2;
     ctx.stroke();
 
+    // Свечение груза
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, 20);
+    gradient.addColorStop(0, '#818cf8');
+    gradient.addColorStop(1, 'transparent');
+    
     ctx.beginPath();
-    ctx.arc(centerX + x, centerY + y, 15, 0, Math.PI * 2);
-    ctx.fillStyle = '#007bff';
+    ctx.arc(x, y, 20, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
     ctx.fill();
-    ctx.closePath();
+
+    // Сам груз
+    ctx.beginPath();
+    ctx.arc(x, y, 10, 0, Math.PI * 2);
+    ctx.fillStyle = '#6366f1';
+    ctx.fill();
 
     time += 0.02;
     requestAnimationFrame(draw);
 }
+
+resetBtn.onclick = () => { 
+    currentAmp = parseFloat(ampInput.value); 
+};
 
 draw();
