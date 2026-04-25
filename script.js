@@ -19,16 +19,12 @@ function draw() {
     ampValue.textContent = A;
     freqValue.textContent = omega;
 
-    // Центр подвеса
     const centerX = canvas.width / 2;
     const centerY = 50;
 
-    // Расчет положения по формуле x(t) = A * cos(omega * t)
-    // Используем sin для вертикального маятника, чтобы он качался влево-вправо
     const x = A * Math.sin(omega * time);
-    const y = Math.sqrt(Math.pow(200, 2) - Math.pow(x, 2)); // Длина нити зафиксирована (200)
+    const y = Math.sqrt(Math.pow(200, 2) - Math.pow(x, 2));
 
-    // Рисуем нить
     ctx.beginPath();
     ctx.moveTo(centerX, centerY);
     ctx.lineTo(centerX + x, centerY + y);
@@ -36,14 +32,13 @@ function draw() {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Рисуем груз
     ctx.beginPath();
     ctx.arc(centerX + x, centerY + y, 15, 0, Math.PI * 2);
     ctx.fillStyle = '#007bff';
     ctx.fill();
     ctx.closePath();
 
-    time += 0.02; // Скорость течения времени
+    time += 0.02;
     requestAnimationFrame(draw);
 }
 
