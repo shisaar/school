@@ -1,63 +1,41 @@
-const canvas = document.getElementById('pendulumCanvas');
-const ctx = canvas.getContext('2d');
-const ampInput = document.getElementById('amplitude');
-const freqInput = document.getElementById('frequency');
-const resetBtn = document.getElementById('resetBtn');
-
-canvas.width = 400;
-canvas.height = 400;
-
-let time = 0;
-let damping = 0.998; // Затухание (1 - не затухает)
-let currentAmp = parseFloat(ampInput.value);
-
-function draw() {
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.2)'; // Эффект шлейфа
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const targetAmp = parseFloat(ampInput.value);
-    const omega = parseFloat(freqInput.value);
-    
-    // Плавное изменение амплитуды
-    currentAmp = currentAmp * damping + (targetAmp * (1 - damping));
-
-    const centerX = canvas.width / 2;
-    const centerY = 50;
-    const length = 250;
-
-    const angle = (currentAmp / 100) * Math.sin(omega * time);
-    
-    const x = centerX + length * Math.sin(angle);
-    const y = centerY + length * Math.cos(angle);
-
-    // Рисуем нить
-    ctx.beginPath();
-    ctx.moveTo(centerX, centerY);
-    ctx.lineTo(x, y);
-    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Рисуем свечение груза
-    const gradient = ctx.createRadialGradient(x, y, 0, x, y, 20);
-    gradient.addColorStop(0, '#818cf8');
-    gradient.addColorStop(1, 'transparent');
-    
-    ctx.beginPath();
-    ctx.arc(x, y, 20, 0, Math.PI * 2);
-    ctx.fillStyle = gradient;
-    ctx.fill();
-
-    // Сам груз
-    ctx.beginPath();
-    ctx.arc(x, y, 10, 0, Math.PI * 2);
-    ctx.fillStyle = '#6366f1';
-    ctx.fill();
-
-    time += 0.02;
-    requestAnimationFrame(draw);
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
-resetBtn.onclick = () => { currentAmp = parseFloat(ampInput.value); };
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    text-align: center;
+}
 
-draw();
+canvas {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: left;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+input[type="range"] {
+    flex-grow: 1;
+}
