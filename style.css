@@ -1,42 +1,96 @@
+:root {
+    --primary: #6366f1;
+    --bg: #0f172a;
+}
+
 body {
     margin: 0;
-    font-family: sans-serif;
-    background-color: #f0f2f5;
+    padding: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at top right, #1e293b, var(--bg));
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-
+    overflow: hidden; /* Чтобы не было лишней прокрутки на мобилках */
 }
 
-.container {
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px); /* Для поддержки Safari на iPhone */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 2rem;
+    width: 85%;
+    max-width: 380px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     text-align: center;
 }
 
+h1 {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #e2e8f0;
+}
+
+.canvas-container {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 canvas {
-    background: #fafafa;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin: 20px 0;
+    width: 100% !important;
+    height: auto !important;
+    display: block;
 }
 
 .controls {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    text-align: left;
+    display: grid;
+    gap: 1.2rem;
 }
 
-.control-group {
+.control-row {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
 }
 
 input[type="range"] {
-    flex-grow: 1;
+    width: 100%;
+    accent-color: var(--primary);
+    height: 20px;
+    cursor: pointer;
+}
+
+button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    margin-top: 5px;
+}
+
+button:active {
+    transform: scale(0.96);
+    background: #4f46e5;
 }
