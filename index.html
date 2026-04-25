@@ -1,1 +1,29 @@
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анимация маятника</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Гармонические колебания</h1>
+        <canvas id="pendulumCanvas"></canvas>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="amplitude">Амплитуда (A):</label>
+                <input type="range" id="amplitude" min="10" max="150" value="100">
+                <span id="ampValue">100</span>
+            </div>
+            <div class="control-group">
+                <label for="frequency">Частота (ω):</label>
+                <input type="range" id="frequency" min="0.5" max="5" step="0.1" value="2">
+                <span id="freqValue">2</span>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
