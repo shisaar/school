@@ -1,69 +1,41 @@
-:root {
-    --primary: #6366f1;
-    --bg: #0f172a;
-}
-
 body {
     margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: radial-gradient(circle at top right, #1e293b, var(--bg));
-    color: white;
+    font-family: sans-serif;
+    background-color: #f0f2f5;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    overflow: hidden;
 }
 
-.glass-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
-    padding: 2rem;
-    width: 90%;
-    max-width: 450px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     text-align: center;
 }
 
-h1 { font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 300; letter-spacing: 1px; }
-
-.canvas-container {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 16px;
-    margin-bottom: 1.5rem;
+canvas {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 20px 0;
 }
 
-canvas { width: 100% !important; height: auto !important; }
-
-.controls { display: grid; gap: 1rem; }
-
-.control-row {
+.controls {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+    gap: 15px;
+    text-align: left;
 }
 
-label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
 input[type="range"] {
-    width: 100%;
-    accent-color: var(--primary);
-    cursor: pointer;
+    flex-grow: 1;
 }
-
-button {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
-    margin-top: 10px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-button:active { transform: scale(0.95); }
