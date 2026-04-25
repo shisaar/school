@@ -8,60 +8,62 @@ canvas.width = 400;
 canvas.height = 400;
 
 let time = 0;
-let damping = 0.998; 
 let currentAmp = parseFloat(ampInput.value);
 
 function draw() {
-    // Полупрозрачный фон для эффекта шлейфа
+    // Эффект плавного затухания следа (шлейф)
     ctx.fillStyle = 'rgba(15, 23, 42, 0.2)'; 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const targetAmp = parseFloat(ampInput.value);
     const omega = parseFloat(freqInput.value);
     
-    // Плавный переход амплитуды
-    currentAmp = currentAmp * damping + (targetAmp * (1 - damping));
+    // Плавное следование за ползунком амплитуды
+    currentAmp = currentAmp * 0.98 + (targetAmp * 0.02);
 
     const centerX = canvas.width / 2;
-    const centerY = 50;
-    const length = 250;
+    const centerY = 40;
+    const length = 280;
 
-    // Уравнение гармонических колебаний
-    const angle = (currentAmp / 100) * Math.sin(omega * time);
+    // Математическая модель x(t) = A * cos(wt)
+    // Используем sin для угла отклонения
+    const angle = (currentAmp / 120) * Math.sin(omega * time);
     
     const x = centerX + length * Math.sin(angle);
     const y = centerY + length * Math.cos(angle);
 
-    // Рисуем нить
+    // Рисуем нить маятника
     ctx.beginPath();
     ctx.moveTo(centerX, centerY);
     ctx.lineTo(x, y);
-    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Свечение груза
-    const gradient = ctx.createRadialGradient(x, y, 0, x, y, 20);
-    gradient.addColorStop(0, '#818cf8');
-    gradient.addColorStop(1, 'transparent');
+    // Рисуем свечение груза
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, 25);
+    glow.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
+    glow.addColorStop(1, 'transparent');
     
     ctx.beginPath();
-    ctx.arc(x, y, 20, 0, Math.PI * 2);
-    ctx.fillStyle = gradient;
+    ctx.arc(x, y, 25, 0, Math.PI * 2);
+    ctx.fillStyle = glow;
     ctx.fill();
 
-    // Сам груз
+    // Сам шар
     ctx.beginPath();
-    ctx.arc(x, y, 10, 0, Math.PI * 2);
-    ctx.fillStyle = '#6366f1';
+    ctx.arc(x, y, 12, 0, Math.PI * 2);
+    ctx.fillStyle = '#818cf8';
     ctx.fill();
 
-    time += 0.02;
+    time += 0.025;
     requestAnimationFrame(draw);
 }
 
-resetBtn.onclick = () => { 
-    currentAmp = parseFloat(ampInput.value); 
+// Сброс амплитуды
+resetBtn.onclick = () => {
+    currentAmp = parseFloat(ampInput.value);
 };
 
+// Запуск
 draw();
