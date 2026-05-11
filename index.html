@@ -3,99 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OSINT Анализатор | Цифровой след</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+    <title>OSINT Анализатор | Проект Руслана</title>
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; margin: 0; display: flex; flex-direction: column; align-items: center; }
-        header { background: #1a2a6c; color: white; width: 100%; padding: 20px; text-align: center; }
-        .main-container { max-width: 800px; width: 90%; margin: 30px; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .upload-box { border: 3px dashed #1a2a6c; padding: 40px; text-align: center; border-radius: 10px; cursor: pointer; background: #f9f9f9; }
-        #results { margin-top: 20px; display: none; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
-        table { width: 100%; border-collapse: collapse; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: white; max-width: 600px; width: 100%; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        header { background: #1a2a6c; color: white; width: 100%; padding: 40px 0; text-align: center; border-radius: 0 0 20px 20px; margin-top: -20px; margin-bottom: 30px; }
+        .upload-area { border: 3px dashed #1a2a6c; padding: 50px; text-align: center; border-radius: 15px; cursor: pointer; background: #f9f9f9; transition: 0.3s; }
+        .upload-area:hover { background: #eff6ff; border-color: #b21f1f; }
+        button { background: #1a2a6c; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; margin-top: 15px; font-size: 16px; }
+        button:hover { background: #2a3a7c; }
+        #results { margin-top: 25px; display: none; padding: 20px; border-radius: 10px; background: #fafafa; border: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         td { padding: 12px; border-bottom: 1px solid #eee; }
-        .label { font-weight: bold; color: #555; }
-        .value { color: #b21f1f; font-family: monospace; }
-        .memo-box { background: #eef2ff; padding: 15px; border-left: 5px solid #1a2a6c; border-radius: 4px; }
+        .label { font-weight: bold; color: #444; width: 45%; }
+        .value { color: #b21f1f; font-family: 'Courier New', monospace; font-weight: bold; }
+        .memo { background: #eef2ff; padding: 20px; border-left: 6px solid #1a2a6c; border-radius: 8px; }
     </style>
 </head>
 <body>
 
 <header>
     <h1>OSINT Анализатор метаданных</h1>
-    <p>Проект Джунейидова Руслана, 10 "В" класс</p>
+    <p>Итоговый проект: Джунейидов Руслан, 10 "В" класс</p>
 </header>
 
-<div class="main-container">
-    <section class="card">
-        <h2>Инструмент проверки фото</h2>
-        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-            <strong>Нажмите для выбора фото (JPEG)</strong>
-            <input type="file" id="fileInput" accept="image/jpeg" style="display:none">
-        </div>
-        <button onclick="testApp()" style="margin-top:15px; padding:10px; cursor:pointer;">Тест интерфейса</button>
+<div class="card">
+    <h2>Проверка цифрового следа</h2>
+    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+        <strong>Кликните для выбора фото (JPEG)</strong>
+        <input type="file" id="fileInput" accept="image/jpeg" style="display:none">
+    </div>
+    <button onclick="testApp()">Проверить работу системы</button>
 
-        <div id="results">
-            <h3>Результаты:</h3>
-            <table id="resTable"></table>
-            <p id="noData" style="display:none; color: orange;">Метаданные не найдены. Попробуйте оригинал фото.</p>
-        </div>
-    </section>
+    <div id="results">
+        <h3 id="resTitle">Результаты анализа:</h3>
+        <table id="resTable"></table>
+    </div>
+</div>
 
-    <section class="card">
-        <h2>Памятка: Как защитить данные</h2>
-        <div class="memo-box">
-            <p>1. Отключайте GPS в настройках камеры телефона.</p>
-            <p>2. Не пересылайте фото в мессенджерах "файлом", если хотите скрыть метаданные.</p>
-            <p>3. Проверяйте снимки этим инструментом перед публикацией.</p>
-        </div>
-    </section>
+<div class="card">
+    <h2>Памятка по безопасности</h2>
+    <div class="memo">
+        <p><strong>1. Геолокация:</strong> Выключите "Сохранять местоположение" в настройках камеры.</p>
+        <p><strong>2. Мессенджеры:</strong> Не отправляйте фото как "Файл", если хотите скрыть данные.</p>
+        <p><strong>3. Проверка:</strong> Используйте этот сервис перед публикацией оригиналов.</p>
+    </div>
 </div>
 
 <script>
+    // Тестовая функция, которая точно сработает
     function testApp() {
-        alert("Скрипт загружен и готов к работе!");
-        const resTable = document.getElementById('resTable');
-        document.getElementById('results').style.display = 'block';
-        resTable.innerHTML = '<tr><td class="label">Статус:</td><td class="value">Тест пройден успешно</td></tr>';
+        const results = document.getElementById('results');
+        const table = document.getElementById('resTable');
+        results.style.display = 'block';
+        document.getElementById('resTitle').innerText = "Тест системы пройден!";
+        table.innerHTML = '<tr><td class="label">Статус:</td><td class="value">Система активна</td></tr>' +
+                          '<tr><td class="label">Версия:</td><td class="value">1.0 (Stable)</td></tr>';
+        alert("Браузер успешно выполнил JavaScript код!");
     }
 
+    // Основная логика анализа
     document.getElementById('fileInput').onchange = function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        const resultsDiv = document.getElementById('results');
-        const resTable = document.getElementById('resTable');
-        const noData = document.getElementById('noData');
-        
-        resultsDiv.style.display = 'block';
-        resTable.innerHTML = '<tr><td>Анализ...</td></tr>';
-        noData.style.display = 'none';
+        const results = document.getElementById('results');
+        const table = document.getElementById('resTable');
+        results.style.display = 'block';
+        document.getElementById('resTitle').innerText = "Анализ файла...";
+        table.innerHTML = '';
 
         EXIF.getData(file, function() {
             const allTags = EXIF.getAllTags(this);
-            resTable.innerHTML = '';
+            let found = false;
             
-            const interestingTags = {
-                "Make": "Производитель",
+            const map = {
+                "Make": "Устройство",
                 "Model": "Модель",
-                "DateTime": "Дата/Время",
+                "DateTime": "Дата снимка",
                 "GPSLatitude": "Широта",
                 "GPSLongitude": "Долгота"
             };
 
-            let found = false;
-            for (let tag in interestingTags) {
+            for (let tag in map) {
                 if (allTags[tag]) {
                     found = true;
                     let val = allTags[tag];
-                    if (tag.includes('GPS')) val = val[0] + "° " + val[1] + "' " + val[2].toFixed(2) + '"';
-                    resTable.innerHTML += <tr><td class="label">${interestingTags[tag]}</td><td class="value">${val}</td></tr>;
+                    if (tag.includes('GPS')) {
+                        val = val[0] + "° " + val[1] + "' " + val[2].toFixed(2) + '"';
+                    }
+                    table.innerHTML += <tr><td class="label">${map[tag]}:</td><td class="value">${val}</td></tr>;
                 }
             }
-            if (!found) noData.style.display = 'block';
+
+            if (!found) {
+                document.getElementById('resTitle').innerText = "Данные не найдены";
+                table.innerHTML = '<tr><td>В этом файле скрытых EXIF-данных нет.</td></tr>';
+            } else {
+                document.getElementById('resTitle').innerText = "Обнаружены скрытые данные:";
+            }
         });
     };
 </script>
+
 </body>
 </html>
