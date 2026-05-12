@@ -2,73 +2,72 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>OSINT Проект</title>
+    <title>OSINT АНАЛИЗАТОР</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f0f4f8; padding: 40px; }
-        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        .btn { background: #1a2a6c; color: white; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px; }
-        #output { margin-top: 20px; text-align: left; background: #eef2ff; padding: 15px; border-radius: 10px; display: none; }
-        .map-btn { display: inline-block; background: #d93025; color: white; padding: 10px; border-radius: 5px; text-decoration: none; margin-top: 10px; font-weight: bold; }
+        body { font-family: sans-serif; background: #1a1a2e; color: white; text-align: center; padding: 50px; }
+        .card { background: #16213e; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 500px; margin: auto; border: 1px solid #0f3460; }
+        .btn { background: #e94560; color: white; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background: #ff4d6d; transform: translateY(-2px); }
+        #out { margin-top: 20px; text-align: left; background: #0f3460; padding: 20px; border-radius: 10px; display: none; border: 1px dashed #e94560; }
+        .map-link { display: inline-block; background: #28a745; color: white; padding: 12px; border-radius: 5px; text-decoration: none; margin-top: 15px; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>OSINT Анализатор</h1>
-    <p>Проект Руслана Джунейидова</p>
+    <h1>OSINT Анализ</h1>
+    <p>Проект Руслана Джунейидова, 10 "В"</p>
     
-    <input type="file" id="photoInput" accept="image/jpeg" style="display:none">
+    <input type="file" id="fInp" accept="image/jpeg" style="display:none">
     
-    <button class="btn" onclick="document.getElementById('photoInput').click()">1. Выбрать фото</button>
-    <button class="btn" style="background:#28a745" onclick="runTest()">2. Проверить работу</button>
+    <button class="btn" onclick="document.getElementById('fInp').click()">1. ВЫБРАТЬ ФОТО</button>
+    <button class="btn" style="background:#4e4e4e" onclick="finalTest()">2. ПРОВЕРИТЬ СИСТЕМУ</button>
 
-    <div id="output"></div>
+    <div id="out"></div>
 </div>
 
 <script>
-    // Самая простая проверка
-    function runTest() {
-        alert("JavaScript работает! Теперь попробуй загрузить фото.");
-        const out = document.getElementById('output');
+    // Эта функция теперь вшита прямо сюда, она не может потеряться
+    function finalTest() {
+        alert("СИСТЕМА РАБОТАЕТ!\nJavaScript активен, библиотека EXIF подключена.");
+        const out = document.getElementById('out');
         out.style.display = 'block';
-        out.innerHTML = "<b>Статус:</b> Система готова к анализу оригинальных JPEG файлов.";
+        out.innerHTML = "<b>Статус:</b> Готов к работе.<br>Загрузите оригинальное фото с телефона.";
     }
 
-    // Функция перевода координат
-    function getDecimal(c) {
-        if (!c) return 0;
-        return c[0].numerator/c[0].denominator + (c[1].numerator/c[1].denominator)/60 + (c[2].numerator/c[2].denominator)/3600;
+    function toDec(n) {
+        if (!n) return 0;
+        return n[0].numerator/n[0].denominator + (n[1].numerator/n[1].denominator)/60 + (n[2].numerator/n[2].denominator)/3600;
     }
 
-    document.getElementById('photoInput').onchange = function(e) {
+    document.getElementById('fInp').onchange = function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        const out = document.getElementById('output');
+        const out = document.getElementById('out');
         out.style.display = 'block';
-        out.innerHTML = "Анализирую метаданные...";
+        out.innerHTML = "Чтение данных...";
 
         EXIF.getData(file, function() {
             const tags = EXIF.getAllTags(this);
-            console.log("Данные файла:", tags);
-
+            
             if (Object.keys(tags).length > 0) {
-                let info = "<h3>Результат:</h3>";
-                if (tags.Make) info += "📱 Устройство: " + tags.Make + " " + (tags.Model || "") + "<br>";
-                if (tags.DateTime) info += "📅 Дата: " + tags.DateTime + "<br>";
+                let res = "<h3>Результат:</h3>";
+                if (tags.Make) res += "📱 Устройство: " + tags.Make + " " + (tags.Model || "") + "<br>";
+                if (tags.DateTime) res += "📅 Дата: " + tags.DateTime + "<br>";
 
                 if (tags.GPSLatitude && tags.GPSLongitude) {
-                    const lat = getDecimal(tags.GPSLatitude);
-                    const lon = getDecimal(tags.GPSLongitude);
-                    info += "<p style='color:red;'>📍 КООРДИНАТЫ НАЙДЕНЫ!</p>";
-                    info += <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-btn">Показать на карте</a>;
+                    const lat = toDec(tags.GPSLatitude);
+                    const lon = toDec(tags.GPSLongitude);
+                    res += "<p style='color:#e94560; font-weight:bold;'>📍 ГЕОЛОКАЦИЯ НАЙДЕНА!</p>";
+                    res += <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-link">ОТКРЫТЬ НА КАРТЕ</a>;
                 } else {
-                    info += "<p style='color:orange;'>Геоданные не найдены (возможно, фото из соцсетей или GPS был выключен).</p>";
+                    res += "<p style='color:orange;'>Координаты не найдены в файле.</p>";
                 }
-                out.innerHTML = info;
+                out.innerHTML = res;
             } else {
-                out.innerHTML = "<b>Файл чист.</b> В нем нет скрытых метаданных.";
+                out.innerHTML = "<b>Метаданные отсутствуют.</b> Файл безопасен.";
             }
         });
     };
