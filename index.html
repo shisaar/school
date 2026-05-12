@@ -21,14 +21,14 @@
     <input type="file" id="upload" accept="image/jpeg" style="display:none">
     
     <button class="btn" onclick="document.getElementById('upload').click()">ЗАГРУЗИТЬ ФОТО</button>
-    <button class="btn" style="background:#444; color:#fff" onclick="finalBoss()">ТЕСТ СИСТЕМЫ</button>
+    <button class="btn" style="background:#444; color:#fff" onclick="start()">ТЕСТ СИСТЕМЫ</button>
 
     <div id="log"></div>
 </div>
 
 <script>
     // Самый надежный тест в мире
-    function finalBoss() {
+    function start() {
         alert("ОШИБКИ УСТРАНЕНЫ!\nТеперь JavaScript работает напрямую из index.html.");
         const log = document.getElementById('log');
         log.style.display = 'block';
