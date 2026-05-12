@@ -1,3 +1,73 @@
+<script>
+    function checkSystem() {
+        alert("Система активна. Готов к поиску координат!");
+        const res = document.getElementById('res');
+        res.style.display = 'block';
+        res.innerHTML = "<b>Статус:</b> Ожидание файла...<br><b>Автор:</b> Руслан Джунейидов";
+    }
+
+    // Функция для перевода координат EXIF в десятичные для карт
+    function toDecimal(number) {
+        if (!number) return 0;
+        return number[0].numerator + number[1].numerator / (60 * number[1].denominator) + number[2].numerator / (3600 * number[2].denominator);
+    }
+
+    document.getElementById('fileInp').onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const res = document.getElementById('res');
+        res.style.display = 'block';
+        res.innerHTML = "<b>Анализ структуры файла...</b>";
+
+        EXIF.getData(file, function() {
+            const tags = EXIF.getAllTags(this);
+            console.log(tags);
+            
+            if (Object.keys(tags).length > 0) {
+                let html = "<h3>Результаты OSINT-анализа:</h3>";
+                if (tags.Make) html += "📱 <b>Устройство:</b> " + tags.Make + " " + (tags.Model || "") + "<br>";
+                if (tags.DateTime) html += "📅 <b>Время снимка:</b> " + tags.DateTime + "<br>";
+                
+                if (tags.GPSLatitude && tags.GPSLongitude) {
+                    // Конвертируем в формат для Google Maps
+                    const lat = toDecimal(tags.GPSLatitude);
+                    const lon = toDecimal(tags.GPSLongitude);
+                    
+                    html += "<p style='color:red; font-weight:bold;'>📍 ГЕОЛОКАЦИЯ НАЙДЕНА!</p>";
+                    html += <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" style="display:inline-block; background:#db4437; color:white; padding:10px; border-radius:5px; text-decoration:none; margin-top:10px;">Открыть точку на картах</a>;
+                } else {
+                    html += "<p style='color:orange;'>Координаты не найдены (возможно, выключен GPS в камере).</p>";
+                }
+                res.innerHTML = html;
+            } else {
+                res.innerHTML = "<b style='color:red;'>Внимание:</b> В этом файле нет метаданных. Фото безопасно для публикации.";
+            }
+        });
+    };
+</script>
+Make) content += "📱 <b>Устройство:</b> " + tags.Make + " " + (tags.Model || "") + "<br>";
+                if (tags.DateTime) content += "📅 <b>Дата создания:</b> " + tags.DateTime + "<br>";
+                
+                if (tags.GPSLatitude && tags.GPSLongitude) {
+                    const lat = toDecimal(tags.GPSLatitude);
+                    const lon = toDecimal(tags.GPSLongitude);
+                    
+                    content += "<p style='color:red; font-weight:bold;'>📍 ОБНАРУЖЕНЫ ТОЧНЫЕ КООРДИНАТЫ!</p>";
+                    content += <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-link">Показать место на карте</a>;
+                } else {
+                    content += "<p style='color:orange;'>Геоданные не обнаружены.</p>";
+                }
+                resDiv.innerHTML = content;
+            } else {
+                resDiv.innerHTML = "<b style='color:green;'>Файл чист.</b> Скрытых метаданных не обнаружено.";
+            }
+        });
+    };
+</script>
+
+</body>
+</html>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
