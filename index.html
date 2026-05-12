@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>OSINT АНАЛИЗАТОР</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -26,7 +28,6 @@
         h1 { font-size: 1.4em; letter-spacing: 3px; margin-bottom: 5px; }
         .subtitle { color: #00aa30; font-size: 0.85em; margin-bottom: 25px; }
 
-        /* Блок советов */
         .tips-box {
             background: #0d1a0d;
             border: 1px solid #00ff4155;
@@ -37,17 +38,8 @@
             font-size: 0.82em;
             color: #00cc35;
         }
-        .tips-box .tip-title {
-            color: #00ff41;
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 0.9em;
-        }
-        .tips-box ul {
-            margin: 0;
-            padding-left: 16px;
-            line-height: 1.8;
-        }
+        .tips-box .tip-title { color: #00ff41; font-weight: bold; margin-bottom: 8px; font-size: 0.9em; }
+        .tips-box ul { margin: 0; padding-left: 16px; line-height: 1.8; }
         .tips-box li span.warn { color: #ffaa00; }
         .tips-box li span.ok   { color: #00ff41; }
 
@@ -70,25 +62,35 @@
         #log {
             margin-top: 20px;
             text-align: left;
-            font-family: 'Courier New', monospace;
             font-size: 0.88em;
             display: none;
             border-top: 1px solid #00ff4155;
             padding-top: 14px;
             line-height: 1.7;
         }
-        #log h3 { color: #00ff41; margin: 0 0 8px; }
-        .gps-alert { color: #ff4444; font-weight: bold; }
+        #log h3 { color: #00ff41; margin: 0 0 10px; }
+
+        #satellite-map {
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            border: 2px solid #ff4444;
+            margin-top: 14px;
+            display: none;
+            box-shadow: 0 0 16px #ff444466;
+        }
+        .gps-label { color: #ff4444; font-weight: bold; margin-top: 10px; }
+        .coords-text { font-size: 0.8em; color: #ffaa00; margin: 4px 0 8px; }
         .map-link {
             display: inline-block;
             background: #ff2222;
             color: white;
-            padding: 9px 18px;
+            padding: 8px 16px;
             text-decoration: none;
             border-radius: 4px;
-            margin-top: 10px;
+            margin-top: 8px;
             font-weight: bold;
-            font-size: 0.9em;
+            font-size: 0.85em;
         }
         .map-link:hover { background: #cc0000; }
         .clean { color: #00ff41; }
@@ -99,7 +101,6 @@
     <h1>[ OSINT АНАЛИЗАТОР ]</h1>
     <p class="subtitle">User: Ruslan &nbsp;|&nbsp; Project: OSINT_Metadata</p>
 
-    <!-- Блок советов -->
     <div class="tips-box">
         <div class="tip-title">⚠ КАК ЗАЩИТИТЬ СВОИ ДАННЫЕ</div>
         <ul>
@@ -115,9 +116,12 @@
     <button class="btn btn-secondary" onclick="testSystem()">ТЕСТ СИСТЕМЫ</button>
 
     <div id="log"></div>
+    <div id="satellite-map"></div>
 </div>
 
 <script>
+    let leafletMap = null;
+
     function testSystem() {
         const log = document.getElementById('log');
         log.style.display = 'block';
@@ -125,7 +129,9 @@
             `> System: <span style="color:#00ff41">ONLINE</span><br>
              > EXIF Engine: <span style="color:#00ff41">LOADED</span><br>
              > GPS Parser: <span style="color:#00ff41">ACTIVE</span><br>
+             > Satellite View: <span style="color:#00ff41">READY</span><br>
              > Waiting for JPEG file...`;
+        document.getElementById('satellite-map').style.display = 'none';
     }
 
     function toDD(coord) {
@@ -135,43 +141,75 @@
              + (coord[2].numerator / coord[2].denominator) / 3600;
     }
 
+    function showSatelliteMap(lat, lon) {
+        const mapEl = document.getElementById('satellite-map');
+        mapEl.style.display = 'block';
+
+        if (leafletMap) { leafletMap.remove(); leafletMap = null; }
+
+        setTimeout(() => {
+            leafletMap = L.map('satellite-map').setView([lat, lon], 16);
+
+            // Спутниковые тайлы ESRI — бесплатно, без API-ключа
+            L.tileLayer(
+                'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                { attribution: 'Satellite © Esri' }
+            ).addTo(leafletMap);
+
+            // Красный маркер
+            const icon = L.divIcon({
+                className: '',
+                html: `<div style="
+                    width:18px; height:18px;
+                    background:#ff4444;
+                    border:3px solid #fff;
+                    border-radius:50%;
+                    box-shadow:0 0 12px #ff4444;
+                "></div>`,
+                iconAnchor: [9, 9]
+            });
+            L.marker([lat, lon], { icon }).addTo(leafletMap)
+             .bindPopup(`<b>Точка съёмки</b><br>${lat.toFixed(6)}, ${lon.toFixed(6)}`)
+             .openPopup();
+        }, 100);
+    }
+
     document.getElementById('upload').onchange = function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
         const log = document.getElementById('log');
         log.style.display = 'block';
+        document.getElementById('satellite-map').style.display = 'none';
         log.innerHTML = `> Scanning: <b>${file.name}</b>...<br>> Reading EXIF metadata...`;
 
         EXIF.getData(file, function() {
             const tags = EXIF.getAllTags(this);
 
             if (Object.keys(tags).length === 0) {
-                log.innerHTML = `> <span class="clean">Метаданные не найдены. Файл чист.</span>`;
+                log.innerHTML = `> <span class="clean">✓ Метаданные не найдены. Файл чист.</span>`;
                 return;
             }
 
             let res = `<h3>[ ANALYSIS RESULT ]</h3>`;
+            if (tags.Make || tags.Model) res += `> Устройство: ${tags.Make || ''} ${tags.Model || ''}<br>`;
+            if (tags.DateTime)           res += `> Дата съёмки: ${tags.DateTime}<br>`;
+            if (tags.Software)           res += `> Программа: ${tags.Software}<br>`;
 
-            if (tags.Make || tags.Model) {
-                res += `> Устройство: ${tags.Make || ''} ${tags.Model || ''}<br>`;
-            }
-            if (tags.DateTime) {
-                res += `> Дата съёмки: ${tags.DateTime}<br>`;
-            }
-            if (tags.Software) {
-                res += `> Программа: ${tags.Software}<br>`;
-            }
             if (tags.GPSLatitude) {
                 const lat = toDD(tags.GPSLatitude)  * (tags.GPSLatitudeRef  === 'S' ? -1 : 1);
                 const lon = toDD(tags.GPSLongitude) * (tags.GPSLongitudeRef === 'W' ? -1 : 1);
-                res += `<br><span class="gps-alert">[!] GPS ОБНАРУЖЕН: ${lat.toFixed(5)}, ${lon.toFixed(5)}</span><br>`;
-                res += `<a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-link">🗺 ОТКРЫТЬ НА КАРТЕ</a>`;
-            } else {
-                res += `> GPS: данных нет.<br>`;
-            }
 
-            log.innerHTML = res;
+                res += `<div class="gps-label">[!] GPS ОБНАРУЖЕН</div>`;
+                res += `<div class="coords-text">LAT: ${lat.toFixed(6)} &nbsp;|&nbsp; LON: ${lon.toFixed(6)}</div>`;
+                res += `<a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-link">🗺 Открыть в Google Maps</a>`;
+
+                log.innerHTML = res;
+                showSatelliteMap(lat, lon);
+            } else {
+                res += `> GPS: данных нет.`;
+                log.innerHTML = res;
+            }
         });
     };
 </script>
