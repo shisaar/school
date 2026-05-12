@@ -2,72 +2,74 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>OSINT АНАЛИЗАТОР</title>
+    <title>OSINT Анализатор</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
     <style>
-        body { font-family: sans-serif; background: #1a1a2e; color: white; text-align: center; padding: 50px; }
-        .card { background: #16213e; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 500px; margin: auto; border: 1px solid #0f3460; }
-        .btn { background: #e94560; color: white; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px; font-weight: bold; transition: 0.3s; }
-        .btn:hover { background: #ff4d6d; transform: translateY(-2px); }
-        #out { margin-top: 20px; text-align: left; background: #0f3460; padding: 20px; border-radius: 10px; display: none; border: 1px dashed #e94560; }
-        .map-link { display: inline-block; background: #28a745; color: white; padding: 12px; border-radius: 5px; text-decoration: none; margin-top: 15px; width: 100%; box-sizing: border-box; }
+        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 50px; margin: 0; }
+        .card { background: #1e293b; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 500px; margin: auto; border: 1px solid #334155; }
+        .btn { background: #38bdf8; color: #0f172a; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px; font-weight: bold; }
+        #output { margin-top: 20px; text-align: left; background: #0f172a; padding: 20px; border-radius: 10px; display: none; border: 1px dashed #38bdf8; }
+        .map-link { display: inline-block; background: #ef4444; color: white; padding: 12px; border-radius: 5px; text-decoration: none; margin-top: 15px; width: 100%; box-sizing: border-box; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>OSINT Анализ</h1>
-    <p>Проект Руслана Джунейидова, 10 "В"</p>
+    <h1>OSINT Анализатор</h1>
+    <p>Проект Руслана Джунейидова</p>
     
-    <input type="file" id="fInp" accept="image/jpeg" style="display:none">
+    <input type="file" id="filePicker" accept="image/jpeg" style="display:none">
     
-    <button class="btn" onclick="document.getElementById('fInp').click()">1. ВЫБРАТЬ ФОТО</button>
-    <button class="btn" style="background:#4e4e4e" onclick="finalTest()">2. ПРОВЕРИТЬ СИСТЕМУ</button>
+    <button class="btn" onclick="document.getElementById('filePicker').click()">ВЫБРАТЬ ФОТО</button>
+    <button class="btn" style="background:#64748b; color:white;" onclick="debugSystem()">ТЕСТ СИСТЕМЫ</button>
 
-    <div id="out"></div>
+    <div id="output"></div>
 </div>
 
 <script>
-    // Эта функция теперь вшита прямо сюда, она не может потеряться
-    function finalTest() {
-        alert("СИСТЕМА РАБОТАЕТ!\nJavaScript активен, библиотека EXIF подключена.");
-        const out = document.getElementById('out');
+    // Эта функция должна быть ПЕРВОЙ, чтобы мы проверили работу
+    function debugSystem() {
+        console.log("Кнопка нажата");
+        alert("Ура! JavaScript работает и кнопка активна.");
+        const out = document.getElementById('output');
         out.style.display = 'block';
-        out.innerHTML = "<b>Статус:</b> Готов к работе.<br>Загрузите оригинальное фото с телефона.";
+        out.innerHTML = "<b>Система в норме.</b><br>Теперь выбери фото (JPEG) с телефона.";
     }
 
-    function toDec(n) {
+    // Логика конвертации координат
+    function toDecimal(n) {
         if (!n) return 0;
         return n[0].numerator/n[0].denominator + (n[1].numerator/n[1].denominator)/60 + (n[2].numerator/n[2].denominator)/3600;
     }
 
-    document.getElementById('fInp').onchange = function(e) {
+    // Обработка файла
+    document.getElementById('filePicker').onchange = function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        const out = document.getElementById('out');
+        const out = document.getElementById('output');
         out.style.display = 'block';
-        out.innerHTML = "Чтение данных...";
+        out.innerHTML = "Анализирую...";
 
         EXIF.getData(file, function() {
             const tags = EXIF.getAllTags(this);
             
             if (Object.keys(tags).length > 0) {
-                let res = "<h3>Результат:</h3>";
-                if (tags.Make) res += "📱 Устройство: " + tags.Make + " " + (tags.Model || "") + "<br>";
-                if (tags.DateTime) res += "📅 Дата: " + tags.DateTime + "<br>";
+                let html = "<h3>Данные найдены:</h3>";
+                if (tags.Make) html += "📱 Устройство: " + tags.Make + " " + (tags.Model || "") + "<br>";
+                if (tags.DateTime) html += "📅 Дата: " + tags.DateTime + "<br>";
 
                 if (tags.GPSLatitude && tags.GPSLongitude) {
-                    const lat = toDec(tags.GPSLatitude);
-                    const lon = toDec(tags.GPSLongitude);
-                    res += "<p style='color:#e94560; font-weight:bold;'>📍 ГЕОЛОКАЦИЯ НАЙДЕНА!</p>";
-                    res += <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-link">ОТКРЫТЬ НА КАРТЕ</a>;
+                    const lat = toDecimal(tags.GPSLatitude);
+                    const lon = toDecimal(tags.GPSLongitude);
+                    html += "<p style='color:#38bdf8; font-weight:bold;'>📍 ГЕОЛОКАЦИЯ ОБНАРУЖЕНА!</p>";
+                    html += <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-link">ОТКРЫТЬ НА КАРТЕ</a>;
                 } else {
-                    res += "<p style='color:orange;'>Координаты не найдены в файле.</p>";
+                    html += "<p style='color:orange;'>Координат нет (возможно, GPS был выключен).</p>";
                 }
-                out.innerHTML = res;
+                out.innerHTML = html;
             } else {
-                out.innerHTML = "<b>Метаданные отсутствуют.</b> Файл безопасен.";
+                out.innerHTML = "<b>Файл пуст.</b> Метаданные не найдены.";
             }
         });
     };
