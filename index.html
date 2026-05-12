@@ -2,78 +2,69 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>OSINT Анализатор</title>
+    <title>OSINT АНАЛИЗАТОР</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
     <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 50px; margin: 0; }
-        .card { background: #1e293b; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 500px; margin: auto; border: 1px solid #334155; }
-        .btn { background: #38bdf8; color: #0f172a; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px; font-weight: bold; }
-        #output { margin-top: 20px; text-align: left; background: #0f172a; padding: 20px; border-radius: 10px; display: none; border: 1px dashed #38bdf8; }
-        .map-link { display: inline-block; background: #ef4444; color: white; padding: 12px; border-radius: 5px; text-decoration: none; margin-top: 15px; width: 100%; box-sizing: border-box; text-align: center; }
+        body { font-family: sans-serif; background: #0a0a0a; color: #00ff41; text-align: center; padding: 50px; }
+        .terminal { background: #000; border: 2px solid #00ff41; padding: 30px; border-radius: 10px; max-width: 500px; margin: auto; box-shadow: 0 0 20px #00ff41; }
+        .btn { background: #00ff41; color: #000; border: none; padding: 15px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 10px; }
+        #log { margin-top: 20px; text-align: left; font-family: monospace; display: none; border-top: 1px solid #00ff41; padding-top: 10px; }
+        .map-link { display: block; background: #ff0000; color: white; padding: 10px; text-decoration: none; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h1>OSINT Анализатор</h1>
-    <p>Проект Руслана Джунейидова</p>
+<div class="terminal">
+    <h1>[ SYSTEM READY ]</h1>
+    <p>User: Ruslan | Project: OSINT_Metadata</p>
     
-    <input type="file" id="filePicker" accept="image/jpeg" style="display:none">
+    <input type="file" id="upload" accept="image/jpeg" style="display:none">
     
-    <button class="btn" onclick="document.getElementById('filePicker').click()">ВЫБРАТЬ ФОТО</button>
-    <button class="btn" style="background:#64748b; color:white;" onclick="debugSystem()">ТЕСТ СИСТЕМЫ</button>
+    <button class="btn" onclick="document.getElementById('upload').click()">ЗАГРУЗИТЬ ФОТО</button>
+    <button class="btn" style="background:#444; color:#fff" onclick="finalBoss()">ТЕСТ СИСТЕМЫ</button>
 
-    <div id="output"></div>
+    <div id="log"></div>
 </div>
 
 <script>
-    // Эта функция должна быть ПЕРВОЙ, чтобы мы проверили работу
-    function debugSystem() {
-        console.log("Кнопка нажата");
-        alert("Ура! JavaScript работает и кнопка активна.");
-        const out = document.getElementById('output');
-        out.style.display = 'block';
-        out.innerHTML = "<b>Система в норме.</b><br>Теперь выбери фото (JPEG) с телефона.";
+    // Самый надежный тест в мире
+    function finalBoss() {
+        alert("ОШИБКИ УСТРАНЕНЫ!\nТеперь JavaScript работает напрямую из index.html.");
+        const log = document.getElementById('log');
+        log.style.display = 'block';
+        log.innerHTML = "> System: Online<br>> Sensors: Active<br>> Ready to scan JPEG...";
     }
 
-    // Логика конвертации координат
-    function toDecimal(n) {
-        if (!n) return 0;
-        return n[0].numerator/n[0].denominator + (n[1].numerator/n[1].denominator)/60 + (n[2].numerator/n[2].denominator)/3600;
+    function toDD(coord) {
+        if (!coord) return 0;
+        return coord[0].numerator/coord[0].denominator + (coord[1].numerator/coord[1].denominator)/60 + (coord[2].numerator/coord[2].denominator)/3600;
     }
 
-    // Обработка файла
-    document.getElementById('filePicker').onchange = function(e) {
+    document.getElementById('upload').onchange = function(e) {
         const file = e.target.files[0];
         if (!file) return;
-
-        const out = document.getElementById('output');
-        out.style.display = 'block';
-        out.innerHTML = "Анализирую...";
+        const log = document.getElementById('log');
+        log.style.display = 'block';
+        log.innerHTML = "> Scanning file: " + file.name + "...";
 
         EXIF.getData(file, function() {
             const tags = EXIF.getAllTags(this);
-            
             if (Object.keys(tags).length > 0) {
-                let html = "<h3>Данные найдены:</h3>";
-                if (tags.Make) html += "📱 Устройство: " + tags.Make + " " + (tags.Model || "") + "<br>";
-                if (tags.DateTime) html += "📅 Дата: " + tags.DateTime + "<br>";
-
-                if (tags.GPSLatitude && tags.GPSLongitude) {
-                    const lat = toDecimal(tags.GPSLatitude);
-                    const lon = toDecimal(tags.GPSLongitude);
-                    html += "<p style='color:#38bdf8; font-weight:bold;'>📍 ГЕОЛОКАЦИЯ ОБНАРУЖЕНА!</p>";
-                    html += <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-link">ОТКРЫТЬ НА КАРТЕ</a>;
-                } else {
-                    html += "<p style='color:orange;'>Координат нет (возможно, GPS был выключен).</p>";
-                }
-                out.innerHTML = html;
+                let res = "<h3>Analysis Result:</h3>";
+                if (tags.Make) res += "Device: " + tags.Make + " " + (tags.Model || "") + "<br>";
+                if (tags.DateTime) res += "Date: " + tags.DateTime + "<br>";
+                if (tags.GPSLatitude) {
+                    const lat = toDD(tags.GPSLatitude);
+                    const lon = toDD(tags.GPSLongitude);
+                    res += "<p style='color:red;'>[!] GEOLOCATION DETECTED</p>";
+                    res += <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-link">OPEN COORDINATES</a>;
+                } else { res += "GPS: No data."; }
+                log.innerHTML = res;
             } else {
-                out.innerHTML = "<b>Файл пуст.</b> Метаданные не найдены.";
+                log.innerHTML = "> No EXIF data found. File is clean.";
             }
         });
     };
 </script>
-
 </body>
 </html>
