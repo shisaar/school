@@ -5,64 +5,173 @@
     <title>OSINT АНАЛИЗАТОР</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
     <style>
-        body { font-family: sans-serif; background: #0a0a0a; color: #00ff41; text-align: center; padding: 50px; }
-        .terminal { background: #000; border: 2px solid #00ff41; padding: 30px; border-radius: 10px; max-width: 500px; margin: auto; box-shadow: 0 0 20px #00ff41; }
-        .btn { background: #00ff41; color: #000; border: none; padding: 15px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 10px; }
-        #log { margin-top: 20px; text-align: left; font-family: monospace; display: none; border-top: 1px solid #00ff41; padding-top: 10px; }
-        .map-link { display: block; background: #ff0000; color: white; padding: 10px; text-decoration: none; margin-top: 10px; text-align: center; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff41;
+            text-align: center;
+            padding: 30px 20px;
+            margin: 0;
+        }
+        .terminal {
+            background: #000;
+            border: 2px solid #00ff41;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 560px;
+            margin: auto;
+            box-shadow: 0 0 30px #00ff4166;
+        }
+        h1 { font-size: 1.4em; letter-spacing: 3px; margin-bottom: 5px; }
+        .subtitle { color: #00aa30; font-size: 0.85em; margin-bottom: 25px; }
+
+        /* Блок советов */
+        .tips-box {
+            background: #0d1a0d;
+            border: 1px solid #00ff4155;
+            border-radius: 6px;
+            padding: 14px 16px;
+            margin-bottom: 20px;
+            text-align: left;
+            font-size: 0.82em;
+            color: #00cc35;
+        }
+        .tips-box .tip-title {
+            color: #00ff41;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        .tips-box ul {
+            margin: 0;
+            padding-left: 16px;
+            line-height: 1.8;
+        }
+        .tips-box li span.warn { color: #ffaa00; }
+        .tips-box li span.ok   { color: #00ff41; }
+
+        .btn {
+            background: #00ff41;
+            color: #000;
+            border: none;
+            padding: 13px 22px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            margin: 8px;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn-secondary { background: #1a1a1a; color: #00ff41; border: 1px solid #00ff41; }
+
+        #log {
+            margin-top: 20px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.88em;
+            display: none;
+            border-top: 1px solid #00ff4155;
+            padding-top: 14px;
+            line-height: 1.7;
+        }
+        #log h3 { color: #00ff41; margin: 0 0 8px; }
+        .gps-alert { color: #ff4444; font-weight: bold; }
+        .map-link {
+            display: inline-block;
+            background: #ff2222;
+            color: white;
+            padding: 9px 18px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .map-link:hover { background: #cc0000; }
+        .clean { color: #00ff41; }
     </style>
 </head>
 <body>
-
 <div class="terminal">
-    <h1>[ SYSTEM READY ]</h1>
-    <p>User: Ruslan | Project: OSINT_Metadata</p>
-    
+    <h1>[ OSINT АНАЛИЗАТОР ]</h1>
+    <p class="subtitle">User: Ruslan &nbsp;|&nbsp; Project: OSINT_Metadata</p>
+
+    <!-- Блок советов -->
+    <div class="tips-box">
+        <div class="tip-title">⚠ КАК ЗАЩИТИТЬ СВОИ ДАННЫЕ</div>
+        <ul>
+            <li>Отправляйте фото <span class="ok">файлом</span>, а не через сжатие — мессенджеры удаляют EXIF</li>
+            <li>Отключите <span class="warn">геолокацию</span> в настройках камеры</li>
+            <li>JPEG хранит: устройство, дату, GPS-координаты</li>
+            <li>Этот инструмент работает <span class="ok">локально</span> — файл никуда не отправляется</li>
+        </ul>
+    </div>
+
     <input type="file" id="upload" accept="image/jpeg" style="display:none">
-    
-    <button class="btn" onclick="document.getElementById('upload').click()">ЗАГРУЗИТЬ ФОТО</button>
-    <button class="btn" style="background:#444; color:#fff" onclick="start()">ТЕСТ СИСТЕМЫ</button>
+    <button class="btn" onclick="document.getElementById('upload').click()">📁 ЗАГРУЗИТЬ ФОТО</button>
+    <button class="btn btn-secondary" onclick="testSystem()">ТЕСТ СИСТЕМЫ</button>
 
     <div id="log"></div>
 </div>
 
 <script>
-    // Самый надежный тест в мире
-    function start() {
-        alert("ОШИБКИ УСТРАНЕНЫ!\nТеперь JavaScript работает напрямую из index.html.");
+    function testSystem() {
         const log = document.getElementById('log');
         log.style.display = 'block';
-        log.innerHTML = "> System: Online<br>> Sensors: Active<br>> Ready to scan JPEG...";
+        log.innerHTML =
+            `> System: <span style="color:#00ff41">ONLINE</span><br>
+             > EXIF Engine: <span style="color:#00ff41">LOADED</span><br>
+             > GPS Parser: <span style="color:#00ff41">ACTIVE</span><br>
+             > Waiting for JPEG file...`;
     }
 
     function toDD(coord) {
         if (!coord) return 0;
-        return coord[0].numerator/coord[0].denominator + (coord[1].numerator/coord[1].denominator)/60 + (coord[2].numerator/coord[2].denominator)/3600;
+        return coord[0].numerator / coord[0].denominator
+             + (coord[1].numerator / coord[1].denominator) / 60
+             + (coord[2].numerator / coord[2].denominator) / 3600;
     }
 
     document.getElementById('upload').onchange = function(e) {
         const file = e.target.files[0];
         if (!file) return;
+
         const log = document.getElementById('log');
         log.style.display = 'block';
-        log.innerHTML = "> Scanning file: " + file.name + "...";
+        log.innerHTML = `> Scanning: <b>${file.name}</b>...<br>> Reading EXIF metadata...`;
 
         EXIF.getData(file, function() {
             const tags = EXIF.getAllTags(this);
-            if (Object.keys(tags).length > 0) {
-                let res = "<h3>Analysis Result:</h3>";
-                if (tags.Make) res += "Device: " + tags.Make + " " + (tags.Model || "") + "<br>";
-                if (tags.DateTime) res += "Date: " + tags.DateTime + "<br>";
-                if (tags.GPSLatitude) {
-                    const lat = toDD(tags.GPSLatitude);
-                    const lon = toDD(tags.GPSLongitude);
-                    res += "<p style='color:red;'>[!] GEOLOCATION DETECTED</p>";
-                    res += <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-link">OPEN COORDINATES</a>;
-                } else { res += "GPS: No data."; }
-                log.innerHTML = res;
-            } else {
-                log.innerHTML = "> No EXIF data found. File is clean.";
+
+            if (Object.keys(tags).length === 0) {
+                log.innerHTML = `> <span class="clean">Метаданные не найдены. Файл чист.</span>`;
+                return;
             }
+
+            let res = `<h3>[ ANALYSIS RESULT ]</h3>`;
+
+            if (tags.Make || tags.Model) {
+                res += `> Устройство: ${tags.Make || ''} ${tags.Model || ''}<br>`;
+            }
+            if (tags.DateTime) {
+                res += `> Дата съёмки: ${tags.DateTime}<br>`;
+            }
+            if (tags.Software) {
+                res += `> Программа: ${tags.Software}<br>`;
+            }
+            if (tags.GPSLatitude) {
+                const lat = toDD(tags.GPSLatitude)  * (tags.GPSLatitudeRef  === 'S' ? -1 : 1);
+                const lon = toDD(tags.GPSLongitude) * (tags.GPSLongitudeRef === 'W' ? -1 : 1);
+                res += `<br><span class="gps-alert">[!] GPS ОБНАРУЖЕН: ${lat.toFixed(5)}, ${lon.toFixed(5)}</span><br>`;
+                res += `<a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-link">🗺 ОТКРЫТЬ НА КАРТЕ</a>`;
+            } else {
+                res += `> GPS: данных нет.<br>`;
+            }
+
+            log.innerHTML = res;
         });
     };
 </script>
