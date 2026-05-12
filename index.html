@@ -2,101 +2,77 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OSINT Анализатор | Цифровой след</title>
+    <title>OSINT Проект</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
     <style>
-        :root { --primary: #1a2a6c; --accent: #b21f1f; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; }
-        header { background: var(--primary); color: white; width: 100%; padding: 30px 0; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .container { max-width: 700px; width: 90%; margin: 30px auto; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h2 { color: var(--primary); margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .upload-area { border: 3px dashed var(--primary); padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; background: #fafafa; transition: 0.3s; }
-        .upload-area:hover { background: #f0f4ff; border-color: var(--accent); }
-        .btn-test { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 15px; }
-        #results { margin-top: 20px; display: none; padding: 15px; border-radius: 8px; background: #fff; border: 1px solid #ddd; text-align: left; }
-        .map-link { display: inline-block; background: var(--accent); color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none; margin-top: 15px; font-weight: bold; }
-        .memo-item { background: #eef2ff; padding: 10px 15px; border-left: 5px solid var(--primary); margin-top: 10px; border-radius: 4px; font-size: 0.9rem; }
+        body { font-family: sans-serif; text-align: center; background: #f0f4f8; padding: 40px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        .btn { background: #1a2a6c; color: white; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px; }
+        #output { margin-top: 20px; text-align: left; background: #eef2ff; padding: 15px; border-radius: 10px; display: none; }
+        .map-btn { display: inline-block; background: #d93025; color: white; padding: 10px; border-radius: 5px; text-decoration: none; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Анализатор цифрового следа</h1>
-    <p>Продукт итогового проекта | Джунейидов Руслан, 10 "В"</p>
-</header>
+<div class="card">
+    <h1>OSINT Анализатор</h1>
+    <p>Проект Руслана Джунейидова</p>
+    
+    <input type="file" id="photoInput" accept="image/jpeg" style="display:none">
+    
+    <button class="btn" onclick="document.getElementById('photoInput').click()">1. Выбрать фото</button>
+    <button class="btn" style="background:#28a745" onclick="runTest()">2. Проверить работу</button>
 
-<div class="container">
-    <section class="card">
-        <h2>Инструмент OSINT-анализа</h2>
-        <p>Загрузите фото (JPG), чтобы проверить наличие скрытых геоданных.</p>
-        
-        <div class="upload-area" onclick="document.getElementById('fileInp').click()">
-            <strong>Кликните для выбора фотографии</strong>
-            <input type="file" id="fileInp" accept="image/jpeg" style="display:none">
-        </div>
-        
-        <button class="btn-test" onclick="checkSystem()">Проверить работу системы</button>
-
-        <div id="results"></div>
-    </section>
-
-    <section class="card">
-        <h2>Памятка по безопасности</h2>
-        <div class="memo-item"><b>1. Геопозиция:</b> Выключите сохранение места в настройках камеры.</div>
-        <div class="memo-item"><b>2. Пересылка:</b> В мессенджерах отправляйте фото как изображение, а не файл.</div>
-        <div class="memo-item"><b>3. Контроль:</b> Всегда проверяйте оригиналы перед публикацией.</div>
-    </section>
+    <div id="output"></div>
 </div>
 
 <script>
-    // Проверка активности скрипта
-    function checkSystem() {
-        alert("Система JavaScript активна и готова к анализу!");
+    // Самая простая проверка
+    function runTest() {
+        alert("JavaScript работает! Теперь попробуй загрузить фото.");
+        const out = document.getElementById('output');
+        out.style.display = 'block';
+        out.innerHTML = "<b>Статус:</b> Система готова к анализу оригинальных JPEG файлов.";
     }
 
     // Функция перевода координат
-    function toDecimal(number) {
-        if (!number) return 0;
-        let deg = number[0].numerator / number[0].denominator;
-        let min = number[1].numerator / number[1].denominator;
-        let sec = number[2].numerator / number[2].denominator;
-        return deg + (min / 60) + (sec / 3600);
+    function getDecimal(c) {
+        if (!c) return 0;
+        return c[0].numerator/c[0].denominator + (c[1].numerator/c[1].denominator)/60 + (c[2].numerator/c[2].denominator)/3600;
     }
 
-    document.getElementById('fileInp').onchange = function(e) {
+    document.getElementById('photoInput').onchange = function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        const resDiv = document.getElementById('results');
-        resDiv.style.display = 'block';
-        resDiv.innerHTML = "<b>Анализирую структуру файла...</b>";
+        const out = document.getElementById('output');
+        out.style.display = 'block';
+        out.innerHTML = "Анализирую метаданные...";
 
         EXIF.getData(file, function() {
             const tags = EXIF.getAllTags(this);
-            
+            console.log("Данные файла:", tags);
+
             if (Object.keys(tags).length > 0) {
-                let content = "<h3>Найдена информация:</h3>";
-                if (tags.Make) content += "📱 <b>Устройство:</b> " + tags.Make + " " + (tags.Model || "") + "<br>";
-                if (tags.DateTime) content += "📅 <b>Дата создания:</b> " + tags.DateTime + "<br>";
-                
+                let info = "<h3>Результат:</h3>";
+                if (tags.Make) info += "📱 Устройство: " + tags.Make + " " + (tags.Model || "") + "<br>";
+                if (tags.DateTime) info += "📅 Дата: " + tags.DateTime + "<br>";
+
                 if (tags.GPSLatitude && tags.GPSLongitude) {
-                    const lat = toDecimal(tags.GPSLatitude);
-                    const lon = toDecimal(tags.GPSLongitude);
-                    
-                    content += "<p style='color:red; font-weight:bold;'>📍 ОБНАРУЖЕНЫ ТОЧНЫЕ КООРДИНАТЫ!</p>";
-                    content += <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-link">Показать место на карте</a>;
+                    const lat = getDecimal(tags.GPSLatitude);
+                    const lon = getDecimal(tags.GPSLongitude);
+                    info += "<p style='color:red;'>📍 КООРДИНАТЫ НАЙДЕНЫ!</p>";
+                    info += <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-btn">Показать на карте</a>;
                 } else {
-                    content += "<p style='color:orange;'>Геоданные не обнаружены.</p>";
+                    info += "<p style='color:orange;'>Геоданные не найдены (возможно, фото из соцсетей или GPS был выключен).</p>";
                 }
-                resDiv.innerHTML = content;
+                out.innerHTML = info;
             } else {
-                resDiv.innerHTML = "<b style='color:green;'>Файл чист.</b> Скрытых метаданных не обнаружено.";
+                out.innerHTML = "<b>Файл чист.</b> В нем нет скрытых метаданных.";
             }
         });
     };
 </script>
 
 </body>
-</html>    
+</html>
